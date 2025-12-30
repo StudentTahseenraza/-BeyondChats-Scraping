@@ -1,27 +1,11 @@
 const Article = require('../models/Article');
 const scraperService = require('../services/scraper.service');
 
-
 class ArticleController {
     /**
      * Scrape and save articles
      */
     async scrapeArticles(req, res) {
-        const articleData = {
-            title: scrapedArticle.title,
-            originalContent: scrapedArticle.originalContent || 'No content available',
-            originalText: scrapedArticle.originalText || scrapedArticle.excerpt || '',
-            originalUrl: scrapedArticle.originalUrl,
-            source: 'original',
-            publishedDate: scrapedArticle.publishedDate || new Date(),
-            scrapedAt: scrapedArticle.scrapedAt || new Date(),
-            images: scrapedArticle.images || []
-        };
-
-        // Only add slug if we have one
-        if (slug && slug.length > 0) {
-            articleData.slug = slug;
-        }
         try {
             console.log('🔧 Starting article scraping process...');
 
@@ -47,7 +31,7 @@ class ArticleController {
             const savedArticles = [];
             const errors = [];
 
-            for (const scrapedArticle of scrapedArticles) {
+            for (const scrapedArticle of scrapedArticles) {  // ← FIX: Changed variable name here
                 try {
                     // Generate slug from title
                     const slug = scrapedArticle.title
@@ -75,10 +59,12 @@ class ArticleController {
                     const articleData = {
                         title: scrapedArticle.title,
                         originalContent: scrapedArticle.originalContent || 'No content available',
+                        originalText: scrapedArticle.originalText || scrapedArticle.excerpt || '', // Added this line
                         originalUrl: scrapedArticle.originalUrl,
                         source: 'original',
                         publishedDate: scrapedArticle.publishedDate || new Date(),
                         scrapedAt: scrapedArticle.scrapedAt || new Date(),
+                        images: scrapedArticle.images || [] // Added this line
                     };
 
                     // Only add slug if we have one
