@@ -174,6 +174,36 @@ class ArticleController {
         }
     }
 
+         /**
+     * Delete all articles
+     */
+    async deleteAllArticles(req, res) {
+        try {
+            console.log('🗑️ Deleting all articles...');
+            
+            // Delete all articles from database
+            const result = await Article.deleteMany({});
+            
+            console.log(`✅ Deleted ${result.deletedCount} articles`);
+            
+            res.status(200).json({
+                success: true,
+                message: `Successfully deleted ${result.deletedCount} articles`,
+                data: {
+                    deletedCount: result.deletedCount,
+                    timestamp: new Date().toISOString()
+                }
+            });
+        } catch (error) {
+            console.error('Error deleting all articles:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error deleting articles',
+                error: error.message,
+            });
+        }
+    }
+
     /**
      * Get single article by ID
      */

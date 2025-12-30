@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Spinner, Alert, Pagination, Form, Button } from 'react-bootstrap';
+import { FaSync } from 'react-icons/fa';
 import ArticleCard from './ArticleCard';
 import { Article } from '../types';
 import { articleService } from '../services/api';
@@ -8,12 +9,14 @@ interface ArticleListProps {
   source?: string;
   title?: string;
   limit?: number;
+  refreshTrigger?: number; // Add this prop
 }
 
 const ArticleList: React.FC<ArticleListProps> = ({ 
   source, 
   title = 'Articles',
-  limit = 9 
+  limit = 9,
+  refreshTrigger = 0 // Default value
 }) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,10 +25,16 @@ const ArticleList: React.FC<ArticleListProps> = ({
   const [totalPages, setTotalPages] = useState(1);
   const [totalArticles, setTotalArticles] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Add internal refresh state
+  const [internalRefresh, setInternalRefresh] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const fetchArticles = async (page: number = 1) => {
+  const fetchArticles = async (page: number = 1, showLoading: boolean = true) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       setError(null);
       
       const response = await articleService.getAllArticles(
@@ -47,12 +56,14 @@ const ArticleList: React.FC<ArticleListProps> = ({
       setError(err.message || 'An error occurred');
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
+  // Add refreshTrigger and internalRefresh to dependencies
   useEffect(() => {
     fetchArticles(currentPage);
-  }, [currentPage, source, searchQuery]);
+  }, [currentPage, source, searchQuery, refreshTrigger, internalRefresh]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -63,6 +74,13 @@ const ArticleList: React.FC<ArticleListProps> = ({
     e.preventDefault();
     setCurrentPage(1);
     fetchArticles(1);
+  };
+
+  // Manual refresh function
+  const handleManualRefresh = () => {
+    setIsRefreshing(true);
+    setInternalRefresh(prev => prev + 1);
+    setCurrentPage(1);
   };
 
   if (loading) {
@@ -99,19 +117,31 @@ const ArticleList: React.FC<ArticleListProps> = ({
           </p>
         </div>
         
-        <Form onSubmit={handleSearch} className="d-flex">
-          <Form.Control
-            type="search"
-            placeholder="Search articles..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="me-2"
-            style={{ width: '250px' }}
-          />
-          <Button variant="outline-secondary" type="submit">
-            Search
+        <div className="d-flex">
+          <Form onSubmit={handleSearch} className="d-flex me-2">
+            <Form.Control
+              type="search"
+              placeholder="Search articles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="me-2"
+              style={{ width: '200px' }}
+            />
+            <Button variant="outline-secondary" type="submit">
+              Search
+            </Button>
+          </Form>
+          
+          {/* Refresh button */}
+          <Button 
+            variant="outline-primary" 
+            onClick={handleManualRefresh}
+            disabled={isRefreshing || loading}
+            title="Refresh articles"
+          >
+            <FaSync className={isRefreshing ? 'fa-spin' : ''} />
           </Button>
-        </Form>
+        </div>
       </div>
       
       {articles.length === 0 ? (
@@ -125,6 +155,11 @@ const ArticleList: React.FC<ArticleListProps> = ({
                 : 'No articles available'
             }
           </p>
+          {source === 'ai-updated' && (
+            <p className="mb-0">
+              Try enhancing some articles first!
+            </p>
+          )}
         </Alert>
       ) : (
         <>
@@ -183,6 +218,14 @@ const ArticleList: React.FC<ArticleListProps> = ({
             </div>
           )}
         </>
+      )}
+      
+      {/* Show refreshing indicator */}
+      {isRefreshing && !loading && (
+        <div className="text-center mt-3">
+          <Spinner animation="border" size="sm" />
+          <span className="ms-2">Refreshing articles...</span>
+        </div>
       )}
     </div>
   );

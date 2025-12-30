@@ -72,11 +72,11 @@ export const articleService = {
     return response.data;
   },
 
-  // Delete article
-  async deleteArticle(id: string): Promise<ApiResponse<Article>> {
-    const response = await api.delete(`/articles/${id}`);
-    return response.data;
-  },
+  // // Delete article
+  // async deleteArticle(id: string): Promise<ApiResponse<Article>> {
+  //   const response = await api.delete(`/articles/${id}`);
+  //   return response.data;
+  // },
 
   async enhanceArticle(id: string, model?: string): Promise<ApiResponse<Article>> {
     const response = await api.post(`/ai/enhance/${id}`, { model });
@@ -97,6 +97,34 @@ export const articleService = {
     const response = await api.post('/ai/test-connection', { model });
     return response.data;
   },
+
+   // Delete all articles
+  async deleteAllArticles(): Promise<ApiResponse<{ deletedCount: number }>> {
+    try {
+      const response = await api.delete('/articles');
+      return response.data;
+    } catch (error: any) {
+      // Handle error response
+      if (error.response && error.response.data) {
+        return error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // Delete single article
+  async deleteArticle(id: string): Promise<ApiResponse<Article>> {
+    try {
+      const response = await api.delete(`/articles/${id}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        return error.response.data;
+      }
+      throw error;
+    }
+  },
+
 };
 
 export default api;

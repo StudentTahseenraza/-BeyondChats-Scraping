@@ -479,6 +479,8 @@ class ScraperService {
             throw error;
         }
     }
+
+    
 }
 
 module.exports = new ScraperService();

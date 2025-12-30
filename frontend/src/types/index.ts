@@ -40,3 +40,19 @@ export interface ScrapingStatus {
   needsScraping: boolean;
   status: string;
 }
+
+export interface DeleteResponse {
+  deletedCount: number;
+  success: boolean;
+  message: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+  count?: number;
+  total?: number;
+  totalPages?: number;
+  currentPage?: number;
+}
