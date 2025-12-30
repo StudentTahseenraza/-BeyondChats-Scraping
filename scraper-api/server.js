@@ -4,7 +4,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const connectDB = require('./src/config/database');
-const aiRoutes = require('./src/routes/ai.routes');
 const articleRoutes = require('./src/routes/article.routes');
 
 
@@ -44,7 +43,6 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/articles', articleRoutes);
-app.use('/api/ai', aiRoutes);
 
 
 // Health check endpoint
